@@ -17,7 +17,7 @@ def stream_papers(data_path):
         citations.discard(line_json[FieldNames.PAPER_ID])  # remove self-citations
         citations = list(citations)
 
-        in_citation_count = len(line_json[FieldNames.IN_CITATIONS])
+        in_citation_count = 0
 
         key_phrases = list(set(line_json[FieldNames.KEY_PHRASES]))
         
@@ -51,8 +51,10 @@ def build_corpus(db_filename, corpus_json):
         conn.execute('''CREATE INDEX IF NOT EXISTS year_idx on ids (year)''')
         conn.execute('''CREATE INDEX IF NOT EXISTS id_idx on ids (id)''')
         conn.execute('''CREATE INDEX IF NOT EXISTS id_doc_idx on documents (id)''')
+        print(conn)
         
         for file in corpus_json:
+            print(file)
             for batch in batchify(stream_papers(file), 1024):
                 conn.executemany(
                     'INSERT INTO ids (id, year) VALUES (?, ?)',

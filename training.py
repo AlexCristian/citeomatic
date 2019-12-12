@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 
@@ -17,23 +19,32 @@ from citeomatic.models.citationranker import CitationRanker
 from citeomatic.citeomaticreader import CiteomaticReader, SimpleReader
 from citeomatic.neighbors import ANN
 from citeomatic.eval_metrics import eval_text_model
+from citeomatic.corpus import Corpus
+from citeomatic.common import DatasetPaths
+
+dp = DatasetPaths()
 
 def from_pkl(n_files):
     df_list = list()
-    for i in tqdm.tqdm(range(n_files)):
+    for i in tqdm.tqdm(range(1, n_files+1)):
         #print(i)
-        df_list.append(pd.read_pickle("../clean_pickle/df0"+str(i)+".pkl"))
+        df_list.append(pd.read_pickle("/data/temp/"+str(i)+".pkl"))
 
     return pd.concat(df_list)
+
+def from_dbfile():
+    return Corpus.load('/data/citeomatic-scratch/citeomatic/data/db/oc.sqlite.db')
     
 #load data
 print("loading data into memory")
-df = from_pkl(1)
+oc = from_dbfile()
 
 print("building index dictionary")
 idx_to_id_dict = {}
-for row in tqdm.tqdm(df.itertuples()):
-    idx_to_id_dict[row[1]] = row[0]
+#for row in tqdm.tqdm(df.itertuples()):
+#    idx_to_id_dict[row[1]] = row[0]
+for item in oc:
+    idx_to_id_dict[item.id] = item
 
 print("initializing model")
 
